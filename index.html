@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASA - Controle de Alimentos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><h1>ASA · Controle de Alimentos</h1></header>
+
+<nav>
+  <button class="btn ativo" data-aba="estoque">Estoque</button>
+  <button class="btn" data-aba="cadastro">Novo produto</button>
+  <button class="btn" data-aba="movimentacoes">Movimentações</button>
+</nav>
+
+<main>
+  <!-- ESTOQUE -->
+  <section id="estoque">
+    <input class="busca" id="busca" type="search" placeholder="Buscar produto ou categoria...">
+    <div class="resumo" id="resumo"></div>
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th><th>Categoria</th><th>Quantidade</th>
+            <th>Mínimo</th><th>Validade</th><th>Situação</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="corpoEstoque"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CADASTRO -->
+  <section id="cadastro" class="oculto">
+    <form class="card" id="formCadastro">
+      <label>Produto *
+        <input name="produto" required maxlength="100">
+      </label>
+      <label>Categoria
+        <input name="categoria" placeholder="Ex.: Grãos, Enlatados, Higiene" maxlength="50">
+      </label>
+      <div class="linha">
+        <label>Quantidade inicial
+          <input name="quantidade" type="number" step="any" min="0" value="0">
+        </label>
+        <label>Unidade
+          <select name="unidade">
+            <option>un</option><option>kg</option><option>g</option>
+            <option>L</option><option>ml</option><option>pacote</option><option>lata</option>
+          </select>
+        </label>
+      </div>
+      <div class="linha">
+        <label>Estoque mínimo
+          <input name="minimo" type="number" step="any" min="0" value="0">
+        </label>
+        <label>Validade
+          <input name="validade" type="date">
+        </label>
+      </div>
+      <label>Responsável *
+        <input name="responsavel" required maxlength="60">
+      </label>
+      <div class="botoes">
+        <button class="btn" type="submit">Salvar produto</button>
+      </div>
+    </form>
+    <div class="msg" id="msgCadastro"></div>
+  </section>
+
+  <!-- MOVIMENTAÇÕES -->
+  <section id="movimentacoes" class="oculto">
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Data</th><th>Tipo</th><th>Produto</th><th>Quantidade</th><th>Responsável</th><th>Observação</th></tr>
+        </thead>
+        <tbody id="corpoMov"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Diálogo de entrada/saída -->
+<dialog id="dlgMov">
+  <form id="formMov">
+    <h2 id="movTitulo"></h2>
+    <input type="hidden" id="movId">
+    <input type="hidden" id="movTipo">
+    <label>Quantidade *
+      <input id="movQtd" type="number" step="any" min="0.01" required>
+    </label>
+    <label>Responsável *
+      <input id="movResp" required maxlength="60">
+    </label>
+    <label>Observação
+      <input id="movObs" maxlength="200" placeholder="Ex.: doação da padaria, cesta montada">
+    </label>
+    <div class="botoes">
+      <button class="btn btn-sec" type="button" onclick="document.getElementById('dlgMov').close()">Cancelar</button>
+      <button class="btn" type="submit" id="btnMov">Confirmar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="script.js"></script>
+</body>
+</html>
