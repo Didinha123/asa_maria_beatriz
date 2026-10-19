@@ -3,109 +3,211 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ASA - Controle de Alimentos</title>
+  <title>ASA · Controle de Estoque</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header><h1>ASA · Controle de Alimentos</h1></header>
+<header class="topo">
+  <div class="marca">
+    <span class="logo">ASA</span>
+    <span class="titulo">Controle de Estoque</span>
+  </div>
+  <div class="usuario" id="usuario"></div>
+</header>
 
-<nav>
-  <button class="btn ativo" data-aba="estoque">Estoque</button>
-  <button class="btn" data-aba="cadastro">Novo produto</button>
-  <button class="btn" data-aba="movimentacoes">Movimentações</button>
+<nav class="menu" id="menu">
+  <button class="aba ativa" data-aba="painel">Painel</button>
+  <button class="aba" data-aba="estoque">Estoque</button>
+  <button class="aba" data-aba="entrada" data-min="voluntario">Entrada</button>
+  <button class="aba" data-aba="entrega" data-min="voluntario">Entrega</button>
+  <button class="aba" data-aba="produtos">Produtos</button>
+  <button class="aba" data-aba="historico">Histórico</button>
+  <button class="aba" data-aba="locais" data-min="admin">Locais</button>
 </nav>
 
 <main>
-  <!-- ESTOQUE -->
-  <section id="estoque">
-    <input class="busca" id="busca" type="search" placeholder="Buscar produto ou categoria...">
-    <div class="resumo" id="resumo"></div>
-    <div class="tabela">
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th><th>Categoria</th><th>Quantidade</th>
-            <th>Mínimo</th><th>Validade</th><th>Situação</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="corpoEstoque"></tbody>
-      </table>
+  <div class="aviso erro oculto" id="acessoNegado"></div>
+  <div class="carregando" id="carregando">Carregando...</div>
+
+  <!-- PAINEL -->
+  <section id="painel" class="secao">
+    <div class="cards">
+      <div class="card-num"><span id="numProdutos">-</span><small>Produtos ativos</small></div>
+      <div class="card-num"><span id="numComEstoque">-</span><small>Com estoque</small></div>
+      <div class="card-num alerta-vermelho"><span id="numVencidos">-</span><small>Lotes vencidos</small></div>
+      <div class="card-num alerta-laranja"><span id="numAVencer">-</span><small>Lotes a vencer (30 dias)</small></div>
+    </div>
+
+    <div class="duas-colunas">
+      <div class="bloco">
+        <h2>Alertas</h2>
+        <div id="listaAlertas"></div>
+      </div>
+      <div class="bloco">
+        <h2>Últimas movimentações</h2>
+        <div class="tabela"><table>
+          <thead><tr><th>Data</th><th>Tipo</th><th>Produto</th><th>Qtd.</th><th>Local</th></tr></thead>
+          <tbody id="corpoUltimas"></tbody>
+        </table></div>
+      </div>
     </div>
   </section>
 
-  <!-- CADASTRO -->
-  <section id="cadastro" class="oculto">
-    <form class="card" id="formCadastro">
-      <label>Produto *
-        <input name="produto" required maxlength="100">
-      </label>
-      <label>Categoria
-        <input name="categoria" placeholder="Ex.: Grãos, Enlatados, Higiene" maxlength="50">
-      </label>
-      <div class="linha">
-        <label>Quantidade inicial
-          <input name="quantidade" type="number" step="any" min="0" value="0">
-        </label>
-        <label>Unidade
-          <select name="unidade">
-            <option>un</option><option>kg</option><option>g</option>
-            <option>L</option><option>ml</option><option>pacote</option><option>lata</option>
-          </select>
-        </label>
+  <!-- ESTOQUE -->
+  <section id="estoque" class="secao oculto">
+    <div class="filtros">
+      <input id="buscaEstoque" type="search" placeholder="Buscar produto...">
+      <select id="filtroLocal"></select>
+      <select id="filtroSituacao">
+        <option value="">Todas as situações</option>
+        <option value="Vencido">Vencido</option>
+        <option value="Vence em breve">Vence em breve</option>
+        <option value="OK">OK</option>
+      </select>
+    </div>
+    <p class="resumo" id="resumoEstoque"></p>
+    <div class="tabela"><table>
+      <thead>
+        <tr><th>Produto</th><th>Local</th><th>Validade</th><th>Quantidade</th><th>Doador</th><th>Situação</th></tr>
+      </thead>
+      <tbody id="corpoEstoque"></tbody>
+    </table></div>
+  </section>
+
+  <!-- ENTRADA -->
+  <section id="entrada" class="secao oculto" data-min="voluntario">
+    <form class="formulario" id="formEntrada">
+      <h2>Registrar entrada (doação)</h2>
+      <div class="grade">
+        <label>Data <input type="date" name="data" required></label>
+        <label>Doador * <input name="doador" required maxlength="120"></label>
+        <label>Local * <select name="localId" class="select-local" required></select></label>
       </div>
-      <div class="linha">
-        <label>Estoque mínimo
-          <input name="minimo" type="number" step="any" min="0" value="0">
-        </label>
-        <label>Validade
-          <input name="validade" type="date">
-        </label>
-      </div>
-      <label>Responsável *
-        <input name="responsavel" required maxlength="60">
-      </label>
-      <div class="botoes">
-        <button class="btn" type="submit">Salvar produto</button>
+      <label>Observação <input name="observacao" maxlength="200"></label>
+      <h3>Itens</h3>
+      <div class="tabela"><table class="tabela-itens">
+        <thead><tr><th>Produto</th><th>Quantidade</th><th>Validade</th><th></th></tr></thead>
+        <tbody id="itensEntrada"></tbody>
+      </table></div>
+      <div class="acoes-form">
+        <button type="button" class="btn secundario" data-add="entrada">+ Adicionar item</button>
+        <button type="submit" class="btn">Salvar entrada</button>
       </div>
     </form>
-    <div class="msg" id="msgCadastro"></div>
   </section>
 
-  <!-- MOVIMENTAÇÕES -->
-  <section id="movimentacoes" class="oculto">
-    <div class="tabela">
-      <table>
-        <thead>
-          <tr><th>Data</th><th>Tipo</th><th>Produto</th><th>Quantidade</th><th>Responsável</th><th>Observação</th></tr>
-        </thead>
-        <tbody id="corpoMov"></tbody>
-      </table>
+  <!-- ENTREGA -->
+  <section id="entrega" class="secao oculto" data-min="voluntario">
+    <form class="formulario" id="formEntrega">
+      <h2>Registrar entrega (saída)</h2>
+      <p class="dica">O sistema usa primeiro os lotes que vencem antes (FEFO).</p>
+      <div class="grade">
+        <label>Data <input type="date" name="data" required></label>
+        <label>Beneficiário / família * <input name="beneficiario" required maxlength="120"></label>
+        <label>Saindo do local * <select name="localId" class="select-local" required></select></label>
+      </div>
+      <label>Observação <input name="observacao" maxlength="200"></label>
+      <h3>Itens</h3>
+      <div class="tabela"><table class="tabela-itens">
+        <thead><tr><th>Produto</th><th>Quantidade</th><th></th></tr></thead>
+        <tbody id="itensEntrega"></tbody>
+      </table></div>
+      <div class="acoes-form">
+        <button type="button" class="btn secundario" data-add="entrega">+ Adicionar item</button>
+        <button type="submit" class="btn">Registrar entrega</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="produtos" class="secao oculto">
+    <div class="filtros">
+      <input id="buscaProduto" type="search" placeholder="Buscar produto...">
+      <button class="btn" id="btnNovoProduto" data-min="voluntario">+ Novo produto</button>
     </div>
+    <div class="tabela"><table>
+      <thead>
+        <tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th>Mínimo</th><th>Em estoque</th><th>Próx. validade</th><th>Alerta</th><th></th></tr>
+      </thead>
+      <tbody id="corpoProdutos"></tbody>
+    </table></div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="historico" class="secao oculto">
+    <h2>Entradas e entregas</h2>
+    <p class="dica">Clique em um registro para ver os itens.</p>
+    <div class="tabela"><table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Doador / Beneficiário</th><th>Local</th><th>Responsável</th><th>Observação</th></tr></thead>
+      <tbody id="corpoHistorico"></tbody>
+    </table></div>
+  </section>
+
+  <!-- LOCAIS -->
+  <section id="locais" class="secao oculto" data-min="admin">
+    <div class="filtros">
+      <h2>Locais de armazenamento</h2>
+      <button class="btn" id="btnNovoLocal">+ Novo local</button>
+    </div>
+    <div class="tabela"><table>
+      <thead><tr><th>Nome</th><th></th></tr></thead>
+      <tbody id="corpoLocais"></tbody>
+    </table></div>
   </section>
 </main>
 
-<!-- Diálogo de entrada/saída -->
-<dialog id="dlgMov">
-  <form id="formMov">
-    <h2 id="movTitulo"></h2>
-    <input type="hidden" id="movId">
-    <input type="hidden" id="movTipo">
-    <label>Quantidade *
-      <input id="movQtd" type="number" step="any" min="0.01" required>
-    </label>
-    <label>Responsável *
-      <input id="movResp" required maxlength="60">
-    </label>
-    <label>Observação
-      <input id="movObs" maxlength="200" placeholder="Ex.: doação da padaria, cesta montada">
-    </label>
-    <div class="botoes">
-      <button class="btn btn-sec" type="button" onclick="document.getElementById('dlgMov').close()">Cancelar</button>
-      <button class="btn" type="submit" id="btnMov">Confirmar</button>
+<!-- Dialog: produto -->
+<dialog id="dlgProduto">
+  <form id="formProduto" class="formulario-dialog">
+    <h2 id="tituloProduto">Novo produto</h2>
+    <input type="hidden" name="id">
+    <label>Nome * <input name="nome" required maxlength="100"></label>
+    <label>Categoria <input name="categoria" maxlength="50" placeholder="Ex.: Grãos, Enlatados, Higiene"></label>
+    <div class="grade">
+      <label>Unidade *
+        <select name="unidade" required>
+          <option>un</option><option>kg</option><option>g</option><option>L</option>
+          <option>ml</option><option>pacote</option><option>lata</option>
+        </select>
+      </label>
+      <label>Estoque mínimo <input name="minimo" type="number" step="any" min="0" value="0"></label>
+    </div>
+    <div class="acoes-form">
+      <button type="button" class="btn secundario" data-fechar="dlgProduto">Cancelar</button>
+      <button type="submit" class="btn">Salvar</button>
     </div>
   </form>
 </dialog>
+
+<!-- Dialog: local -->
+<dialog id="dlgLocal">
+  <form id="formLocal" class="formulario-dialog">
+    <h2 id="tituloLocal">Novo local</h2>
+    <input type="hidden" name="id">
+    <label>Nome * <input name="nome" required maxlength="80" placeholder="Ex.: Depósito, Sala 2, Cozinha"></label>
+    <div class="acoes-form">
+      <button type="button" class="btn secundario" data-fechar="dlgLocal">Cancelar</button>
+      <button type="submit" class="btn">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Dialog: detalhe do documento -->
+<dialog id="dlgDetalhe">
+  <div class="formulario-dialog">
+    <h2 id="tituloDetalhe"></h2>
+    <div class="tabela"><table>
+      <thead><tr><th>Data/hora</th><th>Produto</th><th>Quantidade</th><th>Validade do lote</th></tr></thead>
+      <tbody id="corpoDetalhe"></tbody>
+    </table></div>
+    <div class="acoes-form">
+      <button type="button" class="btn" data-fechar="dlgDetalhe">Fechar</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
 
 <script src="script.js"></script>
 </body>
