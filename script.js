@@ -60,6 +60,14 @@ function podeVer(minimo) {
 /* ============================ INÍCIO ============================ */
 
 async function iniciar() {
+  if (typeof google === 'undefined' || !google.script) {
+    $('carregando').classList.add('oculto');
+    $('menu').classList.add('oculto');
+    $('acessoNegado').textContent = 'Esta página só funciona pelo link do aplicativo no Apps Script (a URL termina em /exec). Abra o sistema por essa URL.';
+    $('acessoNegado').classList.remove('oculto');
+    return;
+  }
+
   try {
     state.sessao = await chamar('getSessao');
   } catch (err) {
